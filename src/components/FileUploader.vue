@@ -11,10 +11,10 @@
         <input
           type="text"
           class="form-control"
-          placeholder="Get Public Key"
+          placeholder="Enter Public Key ( Nostr )"
           v-model="publicKey"
         />
-        <div class="search-btn">
+        <!-- <div class="search-btn">
           <button
             class="btn btn-outline-secondary"
             type="button"
@@ -22,7 +22,7 @@
           >
             GET KEY
           </button>
-        </div>
+        </div> -->
       </div>
       <div class="search-row">
         <input
@@ -42,15 +42,20 @@
         </div> -->
       </div>
     </div>
-    <div>
+    <div class="file-row">
       <form>
-        <label class="file_select"
-          >SELECT FILE
+        <label class="file_select">
+          <!-- <input
+            type="file"
+            id="file-uploader"
+            ref="doc"
+            name="myfile"
+            @change="readFile()"
+          /> -->
           <input
             type="file"
-            id="myfile"
-            ref="file"
-            name="myfile"
+            id="file-uploader"
+            ref="doc"
             @change="readFile()"
           />
         </label>
@@ -87,53 +92,34 @@ export default {
 
   methods: {
     readFile() {
-      console.log("READ FILE");
-      this.example = this.$refs.file.files[0];
-      if (
-        this.example.name.includes(".png") ||
-        this.example.name.includes(".jpg")
-      ) {
-        this.image = true;
-        this.preview = URL.createObjectURL(this.example);
-      } else {
-        this.image = false;
-      }
-    },
-    handleFileChange(e) {
-      console.log("SELECTED A FILE onChange");
-      this.$emit("input", e.target.files[0]);
-      //this.value = e.target.files[0];
-    },
-    onFileSelection() {
-      // called from the select file text
-      console.log("Selected File");
-    },
-    async uploadTheFile() {
-      console.log("form data");
-      let formData = new FormData();
-      formData.append("file", this.myfile.files[0]);
-      await fetch("https://diba-io/carbanado-node/store/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
-      })
-        .then(this._uploadSuccess)
-        .catch(this._uploadError);
-    },
-    _uploadSuccess(response) {
-      console.log("upload success: ", response);
-    },
-    _uploadError(response) {
-      console.log("upload failure error,", response);
-      // alert(response.data ? JSON.stringify(response.data) : response.statusText);
-    },
-    getSecretKey() {
-      console.log("Get Secret");
-    },
-    uploadFile() {
-      console.log("upload large file");
+      // run carbanodo with docker at
+      const url = "https://localhost:8000/carbanado-node/store/";
+      // const url = "https://diba-io/carbanado-node/store/";
+      const size = 100000; // started with 40000
+      var reader = new FileReader();
+      var buf;
+      var file = this.$refs.doc.files[0];
+      reader.onload = function (e) {
+        console.log(">> reader.onload :: ", e);
+        buf = new Uint8Array(e.target.result);
+        for (var i = 0; i < buf.length; i += size) {
+          var fd = new FormData();
+          fd.append("fname", [file.name, i + 1, "of", buf.length].join("-"));
+          fd.append("data", new Blob([buf.subarray(i, i + size)]));
+
+          console.log("FormData : : ", fd);
+          // debug here
+          var oReq = new XMLHttpRequest();
+          oReq.open("POST", url, true);
+          oReq.onload = function (oEvent) {
+            // Uploaded.
+            console.log("Uploaded : : ", oEvent);
+          };
+          oReq.send(fd);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
     },
   },
   computed: {
