@@ -28,7 +28,7 @@
         <input
           type="text"
           class="form-control"
-          placeholder="Display Link Address"
+          placeholder="Returned Link Address"
           v-model="linkAddress"
         />
         <div class="search-btn">
@@ -43,27 +43,21 @@
       </div>
     </div>
     <div class="file-row">
-      <div>
-        <label class="file_select">
-          <input
-            type="file"
-            id="file-uploader"
-            ref="doc"
-            name="myfile"
-            @change="readFileBase64()"
-          />
-        </label>
-      </div>
+      <label class="file_select">
+        <input
+          type="file"
+          id="file-uploader"
+          ref="doc"
+          name="myfile"
+          @change="readFileBase64()"
+        />
+      </label>
+      <button @click="uploadTheFile">Upload</button>
 
       <!-- <input type="file" ref="file" @change="readFile()" /> -->
       <!-- <button class="upload-btn" id="upload-button" @click="uploadTheFile">
           Upload
         </button> -->
-      <div>
-        <button class="upload-btn" id="upload-button" @click="uploadTheFile">
-          Upload
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -205,18 +199,21 @@ a {
   border-radius: 0.6rem;
   border: 1px solid rgb(128, 128, 128, 0.8);
   padding: 13px;
-  margin-top: 20px;
-  margin-left: 6px;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  margin-left: 7px;
+  width: 70%;
 }
-.upload-btn {
-  margin-top: -2px;
+
+button {
+  width: 110px;
+  background-color: #42b983;
 }
 
 .file-row {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 100%;
   margin-top: 10px;
 }
 
