@@ -11,59 +11,59 @@
         <input
           type="text"
           class="form-control"
-          placeholder="Enter Public Key ( Nostr )"
-          v-model="publicKey"
+          placeholder="Enter Public Key in Hex Format ( Nostr )"
+          v-model="pubKey"
         />
-        <!-- <div class="search-btn">
+        <div class="search-btn">
           <button
             class="btn btn-outline-secondary"
             type="button"
-            @click="searchReferral"
+            @click="storeKey"
           >
-            GET KEY
+            STORE KEY
           </button>
-        </div> -->
+        </div>
       </div>
       <div class="search-row">
         <input
           type="text"
           class="form-control"
-          placeholder="Display Address"
-          v-model="address"
+          placeholder="Display Link Address"
+          v-model="linkAddress"
         />
-        <!-- <div class="search-btn">
+        <div class="search-btn">
           <button
             class="btn btn-outline-secondary"
             type="button"
-            @click="searchReferral"
+            @click="copyLlink"
           >
-            Search
+            Copy
           </button>
-        </div> -->
+        </div>
       </div>
     </div>
     <div class="file-row">
-      <form>
+      <div>
         <label class="file_select">
-          <!-- <input
-            type="file"
-            id="file-uploader"
-            ref="doc"
-            name="myfile"
-            @change="readFile()"
-          /> -->
           <input
             type="file"
             id="file-uploader"
             ref="doc"
-            @change="readFile()"
+            name="myfile"
+            @change="readFileBase64()"
           />
         </label>
-        <!-- <input type="file" ref="file" @change="readFile()" /> -->
+      </div>
+
+      <!-- <input type="file" ref="file" @change="readFile()" /> -->
+      <!-- <button class="upload-btn" id="upload-button" @click="uploadTheFile">
+          Upload
+        </button> -->
+      <div>
         <button class="upload-btn" id="upload-button" @click="uploadTheFile">
           Upload
         </button>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -81,23 +81,29 @@ export default {
   },
   data() {
     return {
-      publicKey: "",
+      pubKey: "",
       files: [],
       input: null,
       image: null,
       fileupload: [],
-      address: "",
+      linkAddress: "",
     };
   },
 
   methods: {
+    storeKey() {
+      localStorage.setItem("pubkey", JSON.stringify(this.pubKey));
+      var pk = JSON.parse(localStorage.getItem("pubkey"));
+      this.pubKey = pk;
+      console.log("Store Public Key", this.pubKey);
+    },
     readFile() {
-      const pubkey =
-        "npub1tk405vpyyngm6jf28zegqgjmk0xxmvggygsdtqw46f8m9ch8r67qneuw94";
+      const pubkey = this.pubKey;
+      console.log("Public Key (nostr) :: ", this.pubkey);
       // run carbanodo with docker at
       const url = "https://localhost:8000/carbanado-node/store/";
       // const url = "https://diba-io/carbanado-node/store/";
-      const size = 10000000; // started with 40000
+      const size = 1000000;
       var reader = new FileReader();
       var buf;
       var file = this.$refs.doc.files[0];
@@ -106,7 +112,7 @@ export default {
         buf = new Uint8Array(e.target.result);
         for (var i = 0; i < buf.length; i += size) {
           var fd = new FormData();
-          fd.append("pubkey", pubkey);
+          fd.append("pubkey", [pubkey].join("-"));
           fd.append("fname", [file.name, i + 1, "of", buf.length].join("-"));
           fd.append("data", new Blob([buf.subarray(i, i + size)]));
 
@@ -124,16 +130,40 @@ export default {
 
       reader.readAsArrayBuffer(file);
     },
+    async readFileBase64() {
+      // pubkey
+      // this.pubKey = JSON.parse(localStorage.getItem("pubkey"));
+      console.log("localStorage pubkey: ", this.pubKey);
+      var file = this.$refs.doc.files[0];
+      const chunkSize = 1000000;
+      const url = "https://localhost:8000/carbanado-node/store/:" + this.pubKey;
+
+      console.log("URL : ", url);
+      for (let start = 0; start < file.size; start += chunkSize) {
+        const chunk = file.slice(start, start + chunkSize + 1); // might need to remove +1
+        const fd = new FormData();
+        fd.set("pubkey", this.pubKey);
+        fd.set("data", chunk);
+
+        console.log("FormData :pubkey : ", fd);
+
+        // return the link to the file from response text...
+
+        // await fetch(url, { method: "post", body: fd }).then((res) =>
+        //   res.text()
+        // );
+      }
+    },
   },
   computed: {
     valid() {
       return this.files.length <= this.max;
     },
   },
-  watch: {
-    files(files) {
-      this.$emit("input", files);
-    },
+  mounted() {
+    this.pubKey = JSON.parse(localStorage.getItem("pubkey"));
+    console.log("mounted pubkey set to: ", this.pubKey);
+    // this.pubKey = pk;
   },
 };
 </script>
@@ -182,8 +212,12 @@ a {
   margin-top: -2px;
 }
 
-.file-select-row {
+.file-row {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
 }
 
 /* .file-select > .select-button {
