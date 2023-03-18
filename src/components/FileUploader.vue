@@ -95,7 +95,7 @@ export default {
       // run carbanodo with docker at
       const url = "https://localhost:8000/carbanado-node/store/";
       // const url = "https://diba-io/carbanado-node/store/";
-      const size = 100000; // started with 40000
+      const size = 10000000; // started with 40000
       var reader = new FileReader();
       var buf;
       var file = this.$refs.doc.files[0];
