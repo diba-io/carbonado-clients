@@ -92,6 +92,8 @@ export default {
 
   methods: {
     readFile() {
+      const pubkey =
+        "npub1tk405vpyyngm6jf28zegqgjmk0xxmvggygsdtqw46f8m9ch8r67qneuw94";
       // run carbanodo with docker at
       const url = "https://localhost:8000/carbanado-node/store/";
       // const url = "https://diba-io/carbanado-node/store/";
@@ -104,6 +106,7 @@ export default {
         buf = new Uint8Array(e.target.result);
         for (var i = 0; i < buf.length; i += size) {
           var fd = new FormData();
+          fd.append("pubkey", pubkey);
           fd.append("fname", [file.name, i + 1, "of", buf.length].join("-"));
           fd.append("data", new Blob([buf.subarray(i, i + size)]));
 
