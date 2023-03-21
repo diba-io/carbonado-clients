@@ -85,10 +85,10 @@ export default {
       console.log("Store Public Key", this.pubKey);
     },
     readFile() {
-      const pubkey = this.pubKey;
+      // const pubkey = this.pubKey;
       console.log("Public Key (nostr) :: ", this.pubkey);
       // run carbanodo with docker at
-      const url = "http://127.0.0.1:7000/store/";
+      const url = "http://0.0.0.0:7000/store/:" + this.pubKey;
       const size = 1000000;
       var reader = new FileReader();
       var buf;
@@ -98,7 +98,7 @@ export default {
         buf = new Uint8Array(e.target.result);
         for (var i = 0; i < buf.length; i += size) {
           var fd = new FormData();
-          fd.append("pubkey", [pubkey].join("-"));
+          //fd.append("pubkey", [pubkey].join("-"));
           fd.append("fname", [file.name, i + 1, "of", buf.length].join("-"));
           fd.append("data", new Blob([buf.subarray(i, i + size)]));
 
@@ -120,7 +120,7 @@ export default {
       console.log("localStorage pubkey: ", this.pubKey);
       var file = this.$refs.doc.files[0];
       const chunkSize = 1000000;
-      const url = "http://127.0.0.1:7000/store/:" + this.pubKey;
+      const url = "http://0.0.0.0:7000/store/:" + this.pubKey;
 
       console.log("URL : ", url);
       for (let start = 0; start < file.size; start += chunkSize) {
