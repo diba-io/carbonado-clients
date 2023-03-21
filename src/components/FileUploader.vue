@@ -74,6 +74,7 @@ export default {
       image: null,
       fileupload: [],
       linkAddress: "",
+      response: "",
     };
   },
 
@@ -104,39 +105,43 @@ export default {
 
           console.log("FormData : : ", fd);
 
-          var oReq = new XMLHttpRequest();
-          oReq.open("POST", url, true);
-          oReq.onload = function (oEvent) {
+          var req = new XMLHttpRequest();
+          req.upload.addEventListener("progress", updateProgress);
+          req.upload.addEventListener("load", transferComplete);
+          req.upload.addEventListener("error", transferFailed);
+          req.upload.addEventListener("abort", transferCanceled);
+          req.open("POST", url, true);
+          req.onload = function (oEvent) {
             // Uploaded.
             console.log("Uploaded : : ", oEvent);
           };
-          oReq.send(fd);
+          req.send(fd);
+        }
+        function updateProgress(event) {
+          if (event.lengthComputable) {
+            const percentComplete = (event.loaded / event.total) * 100;
+            this.linkAddress = percentComplete;
+            // ...
+          } else {
+            this.linkAddress =
+              "Unable to compute progress information since the total size is unknown";
+          }
+        }
+
+        function transferComplete(evt) {
+          console.log("The transfer is complete.", evt);
+        }
+
+        function transferFailed(evt) {
+          console.log("An error occurred while transferring the file.", evt);
+        }
+
+        function transferCanceled(evt) {
+          console.log("The transfer has been canceled by the user.", evt);
         }
       };
 
       reader.readAsArrayBuffer(file);
-    },
-    async readFileBase64() {
-      console.log("localStorage pubkey: ", this.pubKey);
-      var file = this.$refs.doc.files[0];
-      const chunkSize = 1000000;
-      const url = "http://0.0.0.0:7000/store/:" + this.pubKey;
-
-      console.log("URL : ", url);
-      for (let start = 0; start < file.size; start += chunkSize) {
-        const chunk = file.slice(start, start + chunkSize + 1); // might need to remove +1
-        const fd = new FormData();
-        fd.set("pubkey", this.pubKey);
-        fd.set("data", chunk);
-
-        console.log("FormData :pubkey : ", fd);
-
-        // return the link to the file from response text...
-
-        // await fetch(url, { method: "post", body: fd }).then((res) =>
-        //   res.text()
-        // );
-      }
     },
   },
   computed: {
