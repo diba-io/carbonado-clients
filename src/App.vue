@@ -22,10 +22,11 @@ export default {
   text-align: center;
   color: #2c3e50;
   background-color: rgb(16, 15, 15);
-  margin-top: 60px;
+  margin: 0px;
+  padding: 0px;
 }
 #img-size {
   width: 100px;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 </style>

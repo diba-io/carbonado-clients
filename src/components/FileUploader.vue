@@ -4,8 +4,6 @@
       <h1>{{ msg }}</h1>
     </div>
     <h4 id="card-header">File Uploader</h4>
-    <!-- <div class="card-body"> -->
-    <!-- <div class="list row"> -->
     <div>
       <div class="search-row">
         <input
@@ -49,15 +47,10 @@
           id="file-uploader"
           ref="doc"
           name="myfile"
-          @change="readFileBase64()"
+          @change="readFile()"
         />
       </label>
       <button @click="uploadTheFile">Upload</button>
-
-      <!-- <input type="file" ref="file" @change="readFile()" /> -->
-      <!-- <button class="upload-btn" id="upload-button" @click="uploadTheFile">
-          Upload
-        </button> -->
     </div>
   </div>
 </template>
@@ -95,8 +88,7 @@ export default {
       const pubkey = this.pubKey;
       console.log("Public Key (nostr) :: ", this.pubkey);
       // run carbanodo with docker at
-      const url = "https://localhost:8000/carbanado-node/store/";
-      // const url = "https://diba-io/carbanado-node/store/";
+      const url = "http://127.0.0.1:7000/store/";
       const size = 1000000;
       var reader = new FileReader();
       var buf;
@@ -111,7 +103,7 @@ export default {
           fd.append("data", new Blob([buf.subarray(i, i + size)]));
 
           console.log("FormData : : ", fd);
-          // debug here
+
           var oReq = new XMLHttpRequest();
           oReq.open("POST", url, true);
           oReq.onload = function (oEvent) {
@@ -125,12 +117,10 @@ export default {
       reader.readAsArrayBuffer(file);
     },
     async readFileBase64() {
-      // pubkey
-      // this.pubKey = JSON.parse(localStorage.getItem("pubkey"));
       console.log("localStorage pubkey: ", this.pubKey);
       var file = this.$refs.doc.files[0];
       const chunkSize = 1000000;
-      const url = "https://localhost:8000/carbanado-node/store/:" + this.pubKey;
+      const url = "http://127.0.0.1:7000/store/:" + this.pubKey;
 
       console.log("URL : ", url);
       for (let start = 0; start < file.size; start += chunkSize) {
@@ -157,7 +147,6 @@ export default {
   mounted() {
     this.pubKey = JSON.parse(localStorage.getItem("pubkey"));
     console.log("mounted pubkey set to: ", this.pubKey);
-    // this.pubKey = pk;
   },
 };
 </script>
@@ -167,23 +156,28 @@ export default {
 h3 {
   margin: 40px 0 0;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
 }
+
 li {
   display: inline-block;
   margin: 0 10px;
 }
+
 a {
   color: #42b983;
 }
+
 .bg-form {
   height: 100vh;
   background-color: rgb(128, 128, 128, 0.8);
   margin: 10px;
   padding: 10px;
 }
+
 .search-row {
   display: flex;
   flex-direction: row;
@@ -216,17 +210,4 @@ button {
   justify-content: space-between;
   margin-top: 10px;
 }
-
-/* .file-select > .select-button {
-  width: 100px;
-  padding: 10px;
-
-  color: white;
-  background-color: #2ea169;
-
-  border-radius: 0.3rem;
-
-  text-align: center;
-  font-weight: bold;
-} */
 </style>
