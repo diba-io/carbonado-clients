@@ -1,5 +1,5 @@
 <template>
-  <img alt="Vue logo" id="img-size" src="./assets/diba-logo.jpg" />
+  <img alt="Diba-Logo" id="img-size" src="./assets/diba-logo.jpg" />
   <FileUploader msg="Carbonado HTTP API" />
 </template>
 
