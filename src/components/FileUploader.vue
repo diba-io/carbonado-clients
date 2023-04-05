@@ -1,9 +1,6 @@
 <template>
   <div class="bg-form">
-    <div class="hello">
-      <h1>{{ msg }}</h1>
-    </div>
-    <h4 id="card-header">File Uploader</h4>
+    <h2 id="card-header">{{ msg }} File Uploader</h2>
     <div>
       <div class="search-row">
         <input
@@ -22,6 +19,18 @@
           </button>
         </div>
       </div>
+      <div class="file-row">
+        <label class="file_select">
+          <input
+            type="file"
+            id="file-uploader"
+            ref="doc"
+            name="myfile"
+            @change="uplaodFile()"
+          />
+        </label>
+        <button @click="uploadTheFile">Upload</button>
+      </div>
       <div class="search-row">
         <input
           type="text"
@@ -35,12 +44,13 @@
             type="button"
             @click="copyLlink"
           >
-            Copy
+            Link
           </button>
         </div>
       </div>
     </div>
-    <div class="file-row">
+
+    <!-- <div class="file-row">
       <label class="file_select">
         <input
           type="file"
@@ -51,6 +61,24 @@
         />
       </label>
       <button @click="uploadTheFile">Upload</button>
+    </div> -->
+
+    <div class="search-row">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Enter Public Key in Hex Format ( Nostr )"
+        v-model="pubKey"
+      />
+      <div class="search-btn">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          @click="getFileSlice"
+        >
+          GET SLICE
+        </button>
+      </div>
     </div>
     <div>
       <div class="search-row">
@@ -79,6 +107,14 @@
         v-model="status"
       />
     </div>
+    <div class="search-row">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Return Snippet/File"
+        v-model="snippet"
+      />
+    </div>
   </div>
 </template>
 
@@ -104,6 +140,7 @@ export default {
       linkAddress: "",
       response: "",
       status: "Upload Status",
+      snippet: "File Read Content",
     };
   },
 
@@ -158,8 +195,8 @@ export default {
 
     async deleteFile() {
       console.log("localStorage pubkey: ", this.pubKey);
-      var file = this.$refs.doc.files[0];
-      const url = "http://0.0.0.0:7000/remove_file/:" + this.pubKey + file;
+      //let file = this.$refs.doc.files[0];
+      const url = "http://127.0.0.1:7000/remove_file/:" + 0 + 3 + this.pubKey;
       console.log("URL : ", url);
 
       await fetch(url, {
@@ -167,6 +204,61 @@ export default {
       })
         .then(this._deleteFileSuccess)
         .catch(this._deleteFileError);
+    },
+
+    _deleteFileSuccess(response) {
+      console.log("DELETE SUCCESS data: ", response);
+      this.linkAddress = response.url;
+      this.status = response.status + " : " + response.statusText;
+    },
+
+    _deleteFileError(response) {
+      console.log("COULDN'T DELETE FILE: ", response);
+      this.status = response.status + " : " + response.statusText;
+    },
+
+    async getFileSlice() {
+      console.log("localStorage pubkey: ", this.pubKey);
+      ///let file = this.$refs.doc.files[0];
+      //let range = 7; // end of range
+      //   let key = "?" + 0 + 3 + this.pubKey;
+      //   let chain = key + "&range_start=3&range_end=7";
+
+      let key = 0 + 3 + this.pubKey;
+      let index_start = 3;
+      let range_end = 7;
+      //let chain = key + ":3:7";
+      const url =
+        "http://127.0.0.1:7000/slice/" +
+        "?black3_hash=" +
+        key +
+        "&index_start=" +
+        index_start +
+        "&range_end=" +
+        range_end;
+      // +
+      // "/:" +
+      // range;
+      console.log(" >>>>>>>> URL : ", url);
+
+      await fetch(url, {
+        method: "get",
+      })
+        .then(this._getFileSliceSuccess)
+        .catch(this._getFileSliceError);
+    },
+
+    _getFileSliceSuccess(response) {
+      console.log("FILE SLICE SUCCESS data: ", response);
+      this.linkAddress = response.url;
+      this.status = response.status + " : " + response.statusText;
+      this.response = response.status + " : " + response;
+    },
+
+    _getFileSliceError(response) {
+      console.log("FILE SLICE ERROR: ", response);
+      this.status = response.status + " : " + response.statusText;
+      this.response = response.status + " : " + response;
     },
   },
 
