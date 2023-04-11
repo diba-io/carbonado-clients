@@ -181,9 +181,11 @@ export default {
       var file = this.$refs.doc.files[0];
 
       if (file.size > 50000000) {
+        let megb = file.size / 1000000;
         console.log("File Size ( limit is 50 MB )");
-        console.log("Sorry File is Over Capacity", file.size);
-        this.response = "Sorry File is Over Capacity";
+        console.log("Sorry File is Over Capacity ", megb.toFixed(2) + " MB");
+        this.status =
+          "Max File Size is : 50 MB, your file is " + megb.toFixed(2) + " MB";
       } else {
         const chunkSize = 1000000;
         for (let start = 0; start < file.size; start += chunkSize) {
