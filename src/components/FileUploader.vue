@@ -29,6 +29,13 @@
             @change="uplaodFile()"
           />
         </label>
+        <input
+          type="text"
+          class="form-control"
+          id="ranges"
+          placeholder="Enter Public Key in Hex Format ( Nostr )"
+          v-model="slice_count"
+        />
         <button @click="uploadTheFile">Upload</button>
       </div>
       <div class="search-row">
@@ -69,6 +76,20 @@
         class="form-control"
         placeholder="Enter Public Key in Hex Format ( Nostr )"
         v-model="pubKey"
+      />
+      <input
+        type="text"
+        class="form-control"
+        id="ranges"
+        placeholder="Enter Public Key in Hex Format ( Nostr )"
+        v-model="index_start"
+      />
+      <input
+        type="text"
+        class="form-control"
+        id="ranges"
+        placeholder="Enter Public Key in Hex Format ( Nostr )"
+        v-model="range_end"
       />
       <div class="search-btn">
         <button
@@ -112,7 +133,7 @@
         type="text"
         class="form-control"
         placeholder="Return Snippet/File"
-        v-model="snippet"
+        v-model="response"
       />
     </div>
   </div>
@@ -141,6 +162,9 @@ export default {
       response: "",
       status: "Upload Status",
       snippet: "File Read Content",
+      index_start: 65536,
+      range_end: 8192,
+      slice_count: 0,
     };
   },
 
@@ -155,30 +179,39 @@ export default {
     async uplaodFile() {
       console.log("localStorage pubkey: ", this.pubKey);
       var file = this.$refs.doc.files[0];
-      const chunkSize = 1000000;
-      for (let start = 0; start < file.size; start += chunkSize) {
-        const url = "http://127.0.0.1:7000/store/" + 0 + 3 + this.pubKey;
-        console.log("URL : ", url);
-        const chunk = file.slice(start, start + chunkSize);
-        const fd = new FormData();
-        fd.set("data", chunk);
-        console.log("FormData :pubkey : ", fd);
 
-        const myHeaders = new Headers();
-        myHeaders.append("Accept", "image/*");
-        myHeaders.append("Access-Control-Allow-Origin", "*");
+      if (file.size > 50000000) {
+        let megb = file.size / 1000000;
+        console.log("File Size ( limit is 50 MB )");
+        console.log("Sorry File is Over Capacity ", megb.toFixed(2) + " MB");
+        this.status =
+          "Max File Size is : 50 MB, your file is " + megb.toFixed(2) + " MB";
+      } else {
+        const chunkSize = 1000000;
+        for (let start = 0; start < file.size; start += chunkSize) {
+          const url = "http://127.0.0.1:7000/store/" + 0 + 3 + this.pubKey;
+          console.log("URL : ", url);
+          const chunk = file.slice(start, start + chunkSize);
+          const fd = new FormData();
+          fd.set("data", chunk);
+          console.log("FormData :pubkey : ", fd);
 
-        await fetch(url, {
-          method: "POST",
-          mode: "no-cors",
-          cache: "no-cache",
-          headers: myHeaders,
-          redirect: "follow",
-          referrerPolicy: "no-referrer",
-          body: fd,
-        })
-          .then(this._uploadSuccess)
-          .catch(this._uplaodError);
+          const myHeaders = new Headers();
+          myHeaders.append("Accept", "image/*");
+          myHeaders.append("Access-Control-Allow-Origin", "*");
+
+          await fetch(url, {
+            method: "POST",
+            mode: "no-cors",
+            cache: "no-cache",
+            headers: myHeaders,
+            redirect: "follow",
+            referrerPolicy: "no-referrer",
+            body: fd,
+          })
+            .then(this._uploadSuccess)
+            .catch(this._uplaodError);
+        }
       }
     },
 
@@ -186,6 +219,7 @@ export default {
       console.log("response UPLOAD SUCCESS data: ", response);
       this.linkAddress = response.url;
       this.status = response.status + " : " + response.statusText;
+      this.response = response.data;
     },
 
     _uplaodError(response) {
@@ -219,26 +253,18 @@ export default {
 
     async getFileSlice() {
       console.log("localStorage pubkey: ", this.pubKey);
-      ///let file = this.$refs.doc.files[0];
-      //let range = 7; // end of range
-      //   let key = "?" + 0 + 3 + this.pubKey;
-      //   let chain = key + "&range_start=3&range_end=7";
-
       let key = 0 + 3 + this.pubKey;
-      let index_start = 3;
-      let range_end = 7;
+      let index_start = this.index_start;
+      let range_end = this.range_end;
       //let chain = key + ":3:7";
       const url =
         "http://127.0.0.1:7000/slice/" +
-        "?black3_hash=" +
+        "?pk=" +
         key +
         "&index_start=" +
         index_start +
         "&range_end=" +
         range_end;
-      // +
-      // "/:" +
-      // range;
       console.log(" >>>>>>>> URL : ", url);
 
       await fetch(url, {
@@ -252,7 +278,7 @@ export default {
       console.log("FILE SLICE SUCCESS data: ", response);
       this.linkAddress = response.url;
       this.status = response.status + " : " + response.statusText;
-      this.response = response.status + " : " + response;
+      this.response = response;
     },
 
     _getFileSliceError(response) {
@@ -333,5 +359,9 @@ button {
   flex-direction: row;
   justify-content: space-between;
   margin-top: 10px;
+}
+
+#ranges {
+  width: 15%;
 }
 </style>
