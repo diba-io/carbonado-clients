@@ -1,58 +1,76 @@
 <template>
   <div class="bg-form">
-    <h2 id="card-header">{{ msg }} File Uploader</h2>
+    <!-- <h2 id="card-header">{{ msg }}</h2> -->
     <div>
-      <div class="search-row">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Enter Public Key in Hex Format ( Nostr )"
-          v-model="pubKey"
-        />
-        <div class="search-btn">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            @click="storeKey"
-          >
-            STORE KEY
-          </button>
+      <div class="file-row">
+        <div class="form-group" id="left-group-width">
+          <input
+            type="text"
+            class="form-control"
+            id="pad"
+            placeholder="Enter Public Key in Hex Format ( Nostr )"
+            v-model="pubKey"
+          />
+        </div>
+        <div class="form-group" id="group-width">
+          <div class="search-btn">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              @click="storeKey"
+            >
+              STORE KEY
+            </button>
+          </div>
         </div>
       </div>
       <div class="file-row">
-        <label class="file_select">
-          <input
-            type="file"
-            id="file-uploader"
-            ref="doc"
-            name="myfile"
-            @change="uplaodFile()"
-          />
-        </label>
-        <input
-          type="text"
-          class="form-control"
-          id="ranges"
-          placeholder="Enter Public Key in Hex Format ( Nostr )"
-          v-model="slice_count"
-        />
-        <button @click="uploadTheFile">Upload</button>
-      </div>
-      <div class="search-row">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Returned Link Address"
-          v-model="linkAddress"
-        />
-        <div class="search-btn">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            @click="copyLlink"
+        <div class="form-group" id="choose-group-width">
+          <label id="enhance-text" for="file-uploader"
+            >Choose af File to Upload</label
           >
-            Link
-          </button>
+          <label class="file_select">
+            <input
+              type="file"
+              id="file-uploader"
+              ref="doc"
+              name="myfile"
+              @change="uplaodFile()"
+            />
+          </label>
+        </div>
+        <div class="form-group" id="right-group-width">
+          <label id="enhance-text" for="ranges">Slices</label>
+          <input
+            type="text"
+            class="form-control"
+            id="ranges"
+            placeholder="Enter Public Key in Hex Format ( Nostr )"
+            v-model="slice_count"
+          />
+
+          <!-- <button @click="uploadTheFile">Upload</button> -->
+        </div>
+      </div>
+      <div class="file-row">
+        <div class="form-group" id="left-group-width">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Returned Link Address"
+            v-model="linkAddress"
+          />
+        </div>
+        <div class="form-group" id="group-width">
+          <div class="search-btn">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              @click="copyLlink"
+            >
+              Link
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -70,71 +88,93 @@
       <button @click="uploadTheFile">Upload</button>
     </div> -->
 
-    <div class="search-row">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Enter Public Key in Hex Format ( Nostr )"
-        v-model="pubKey"
-      />
-      <input
-        type="text"
-        class="form-control"
-        id="ranges"
-        placeholder="Enter Public Key in Hex Format ( Nostr )"
-        v-model="index_start"
-      />
-      <input
-        type="text"
-        class="form-control"
-        id="ranges"
-        placeholder="Enter Public Key in Hex Format ( Nostr )"
-        v-model="range_end"
-      />
-      <div class="search-btn">
-        <button
-          class="btn btn-outline-secondary"
-          type="button"
-          @click="getFileSlice"
-        >
-          GET SLICE
-        </button>
-      </div>
-    </div>
-    <div>
-      <div class="search-row">
+    <div class="block-row">
+      <div class="form-group" id="full-group-width">
         <input
           type="text"
           class="form-control"
-          placeholder="Delete File Link Address"
-          v-model="linkAddress"
+          placeholder="Enter Public Key in Hex Format ( Nostr )"
+          v-model="pubKey"
         />
-        <div class="search-btn">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            @click="deleteFile"
-          >
-            Delete
-          </button>
+      </div>
+
+      <div class="slice-row">
+        <div class="form-group">
+          <label id="enhance-text" for="file-uploader">Start</label>
+          <input
+            type="text"
+            class="form-control"
+            id="range-width"
+            placeholder="Start"
+            v-model="index_start"
+          />
+        </div>
+        <div class="form-group">
+          <label id="enhance-text" for="file-uploader">Range</label>
+          <input
+            type="text"
+            class="form-control"
+            id="range-width"
+            placeholder="Range"
+            v-model="range_end"
+          />
+        </div>
+        <div class="form-group" id="group-width">
+          <label id="enhance-text" for="file-uploader">.</label>
+          <div class="search-btn">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              @click="getFileSlice"
+            >
+              GET SLICE
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="search-row">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Status"
-        v-model="status"
-      />
+    <div>
+      <div class="file-row">
+        <div class="form-group" id="left-group-width">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Delete File Link Address"
+            v-model="linkAddress"
+          />
+        </div>
+        <div class="form-group" id="group-width">
+          <div class="search-btn">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              @click="deleteFile"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="search-row">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Return Snippet/File"
-        v-model="response"
-      />
+    <div class="file-row">
+      <div class="form-group" id="full-group-width">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Status"
+          v-model="status"
+        />
+      </div>
+    </div>
+    <div class="file-row">
+      <div class="form-group" id="full-group-width">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Return Snippet/File"
+          v-model="response"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -165,6 +205,7 @@ export default {
       index_start: 65536,
       range_end: 8192,
       slice_count: 0,
+      blake3_hash: "",
     };
   },
 
@@ -180,39 +221,39 @@ export default {
       console.log("localStorage pubkey: ", this.pubKey);
       var file = this.$refs.doc.files[0];
 
-      if (file.size > 50000000) {
-        let megb = file.size / 1000000;
-        console.log("File Size ( limit is 50 MB )");
-        console.log("Sorry File is Over Capacity ", megb.toFixed(2) + " MB");
-        this.status =
-          "Max File Size is : 50 MB, your file is " + megb.toFixed(2) + " MB";
-      } else {
-        const chunkSize = 1000000;
-        for (let start = 0; start < file.size; start += chunkSize) {
-          const url = "http://127.0.0.1:7000/store/" + 0 + 3 + this.pubKey;
-          console.log("URL : ", url);
-          const chunk = file.slice(start, start + chunkSize);
-          const fd = new FormData();
-          fd.set("data", chunk);
-          console.log("FormData :pubkey : ", fd);
+      //   if (file.size > 50000000) {
+      //     let megb = file.size / 1000000;
+      //     console.log("File Size ( limit is 50 MB )");
+      //     console.log("Sorry File is Over Capacity ", megb.toFixed(2) + " MB");
+      //     this.status =
+      //       "Max File Size is : 50 MB, your file is " + megb.toFixed(2) + " MB";
+      //   } else {
+      const chunkSize = 1000000;
+      for (let start = 0; start < file.size; start += chunkSize) {
+        const url = "http://127.0.0.1:7000/store/" + 0 + 3 + this.pubKey;
+        console.log("URL : ", url);
+        const chunk = file.slice(start, start + chunkSize);
+        const fd = new FormData();
+        fd.set("data", chunk);
+        console.log("FormData :pubkey : ", fd);
 
-          const myHeaders = new Headers();
-          myHeaders.append("Accept", "image/*");
-          myHeaders.append("Access-Control-Allow-Origin", "*");
+        const myHeaders = new Headers();
+        myHeaders.append("Accept", "image/*");
+        myHeaders.append("Access-Control-Allow-Origin", "*");
 
-          await fetch(url, {
-            method: "POST",
-            mode: "no-cors",
-            cache: "no-cache",
-            headers: myHeaders,
-            redirect: "follow",
-            referrerPolicy: "no-referrer",
-            body: fd,
-          })
-            .then(this._uploadSuccess)
-            .catch(this._uplaodError);
-        }
+        await fetch(url, {
+          method: "POST",
+          mode: "no-cors",
+          cache: "no-cache",
+          headers: myHeaders,
+          redirect: "follow",
+          referrerPolicy: "no-referrer",
+          body: fd,
+        })
+          .then(this._uploadSuccess)
+          .catch(this._uplaodError);
       }
+      //}
     },
 
     _uploadSuccess(response) {
@@ -254,6 +295,7 @@ export default {
     async getFileSlice() {
       console.log("localStorage pubkey: ", this.pubKey);
       let key = 0 + 3 + this.pubKey;
+      let blake3_hash = this.blake3_hash;
       let index_start = this.index_start;
       let range_end = this.range_end;
       //let chain = key + ":3:7";
@@ -261,6 +303,8 @@ export default {
         "http://127.0.0.1:7000/slice/" +
         "?pk=" +
         key +
+        "&blake3_hash=" +
+        blake3_hash +
         "&index_start=" +
         index_start +
         "&range_end=" +
@@ -321,19 +365,6 @@ a {
   color: #42b983;
 }
 
-.bg-form {
-  height: 100vh;
-  background-color: rgb(128, 128, 128, 0.8);
-  margin: 10px;
-  padding: 10px;
-}
-
-.search-row {
-  display: flex;
-  flex-direction: row;
-  padding-left: 10px;
-}
-
 .file_select {
   color: whitesmoke;
   background-color: rgb(0, 0, 0, 0.6);
@@ -354,14 +385,215 @@ button {
   background-color: #42b983;
 }
 
-.file-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
 #ranges {
   width: 15%;
+}
+@media only screen and (min-width: 1025px) {
+  .bg-form {
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 150vh;
+    background-color: rgb(128, 128, 128, 0.8);
+    margin-left: 10%;
+    margin-right: 10%;
+    padding-top: 5%;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .file-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .file-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 0px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding: 0vmin;
+  }
+  #left-group-width {
+    width: 60%;
+  }
+  #center-group-width {
+    width: 15%;
+  }
+
+  #right-group-width {
+    width: 20%;
+  }
+
+  #full-group-width {
+    width: 100%;
+  }
+}
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  .bg-form {
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 150vh;
+    background-color: rgb(128, 128, 128, 0.8);
+    margin-left: 1%;
+    margin-right: 1%;
+    padding-top: 5%;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .file-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 0px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding: 0vmin;
+  }
+
+  #left-group-width {
+    width: 60%;
+  }
+  #center-group-width {
+    width: 15%;
+  }
+
+  #right-group-width {
+    width: 20%;
+  }
+
+  #full-group-width {
+    width: 100%;
+  }
+}
+@media only screen and (min-width: 360px) and (max-width: 767px) and (-webkit-device-pixel-ratio: 2) {
+  .bg-form {
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 150vh;
+    background-color: rgb(128, 128, 128, 0.8);
+    margin-left: 1%;
+    margin-right: 1%;
+    padding-top: 5%;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .file-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 0px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding: 0vmin;
+  }
+
+  #left-group-width {
+    width: 60%;
+  }
+  #center-group-width {
+    width: 15%;
+  }
+
+  #right-group-width {
+    width: 20%;
+  }
+
+  #full-group-width {
+    width: 100%;
+  }
+}
+@media only screen and (min-width: 360px) and (max-width: 767px) {
+  .bg-form {
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 150vh;
+    background-color: rgb(128, 128, 128, 0.8);
+    margin-left: 1%;
+    margin-right: 1%;
+    padding-top: 50px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .file-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .slice-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .block-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 0px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-top: 10px;
+  }
+
+  #left-group-width {
+    width: 60%;
+  }
+  #range-width {
+    width: 75%;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  #right-group-width {
+    width: 20%;
+  }
+
+  #full-group-width {
+    width: 100%;
+  }
+
+  label {
+    color: rgb(93, 90, 90);
+    opacity: 1;
+    font-weight: 400;
+    font-size: medium;
+    display: block;
+    padding-top: 5px;
+    margin-right: -10px;
+  }
+
+  #pad {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
 }
 </style>
