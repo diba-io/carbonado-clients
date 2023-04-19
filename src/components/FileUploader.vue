@@ -87,6 +87,27 @@
       </label>
       <button @click="uploadTheFile">Upload</button>
     </div> -->
+    <div class="file-row">
+      <div class="form-group" id="left-group-width">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Get File"
+          v-model="blake3_hash"
+        />
+      </div>
+      <div class="form-group" id="group-width">
+        <div class="search-btn">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            @click="getFile"
+          >
+            Get File
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div class="block-row">
       <div class="form-group" id="full-group-width">
@@ -176,6 +197,11 @@
         />
       </div>
     </div>
+    <div class="file-row">
+      <div class="form-group" id="full-group-width">
+        <div id="target"></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -221,13 +247,6 @@ export default {
       console.log("localStorage pubkey: ", this.pubKey);
       var file = this.$refs.doc.files[0];
 
-      //   if (file.size > 50000000) {
-      //     let megb = file.size / 1000000;
-      //     console.log("File Size ( limit is 50 MB )");
-      //     console.log("Sorry File is Over Capacity ", megb.toFixed(2) + " MB");
-      //     this.status =
-      //       "Max File Size is : 50 MB, your file is " + megb.toFixed(2) + " MB";
-      //   } else {
       const chunkSize = 1000000;
       for (let start = 0; start < file.size; start += chunkSize) {
         const url = "http://127.0.0.1:7000/store/" + 0 + 3 + this.pubKey;
@@ -238,7 +257,7 @@ export default {
         console.log("FormData :pubkey : ", fd);
 
         const myHeaders = new Headers();
-        myHeaders.append("Accept", "image/*");
+        myHeaders.append("Accept", "*");
         myHeaders.append("Access-Control-Allow-Origin", "*");
 
         await fetch(url, {
@@ -250,17 +269,73 @@ export default {
           referrerPolicy: "no-referrer",
           body: fd,
         })
-          .then(this._uploadSuccess)
-          .catch(this._uplaodError);
+          .then((response) => response)
+          .then((result) => {
+            // Do things with result
+            console.log(" UPLOAD -> RESPONSE:: ", result);
+            this._uploadSuccess(result);
+          });
+        //.catch(this._uplaodError);
       }
       //}
     },
 
-    _uploadSuccess(response) {
+    async _uploadSuccess(response) {
       console.log("response UPLOAD SUCCESS data: ", response);
-      this.linkAddress = response.url;
-      this.status = response.status + " : " + response.statusText;
-      this.response = response.data;
+      //   this.linkAddress = response.url;
+      //   this.status = response.status + " : " + response.statusText;
+      //   this.response = response.data;
+
+      const url = "http://127.0.0.1:7000/last_hash/" + 0 + 3 + this.pubKey;
+      console.log("Last Hash URL : ", url);
+
+      // ON UPLOAD SUCCESS GET LAST HASH
+      await fetch(url, {
+        method: "get",
+      })
+        .then((response) => response.body)
+        .then((rb) => {
+          const reader = rb.getReader();
+
+          return new ReadableStream({
+            start(controller) {
+              // The following function handles each data chunk
+              function push() {
+                // "done" is a Boolean and value a "Uint8Array"
+                reader.read().then(({ done, value }) => {
+                  // If there is no more data to read
+                  if (done) {
+                    console.log("done", done);
+                    controller.close();
+                    return;
+                  }
+                  // Get the data and send it to the browser via the controller
+                  controller.enqueue(value);
+                  // Check chunks by logging to the console
+                  console.log("LAST HASH DONE :: ", done);
+                  console.log("LAST HASH VALUE :: ", value);
+                  // this.response = value;
+                  push();
+                });
+              }
+
+              push();
+            },
+          });
+        })
+        .then((stream) =>
+          // Respond with our stream
+          new Response(stream, {
+            headers: { "Content-Type": "text/html" },
+          }).text()
+        )
+        .then((result) => {
+          // Do things with result
+          console.log("GET LAST HASH -> RESULT:: ", result);
+          this.linkAddress = result;
+          this.blake3_hash = result;
+          //this._getFileSuccess(result);
+        });
     },
 
     _uplaodError(response) {
@@ -290,6 +365,82 @@ export default {
     _deleteFileError(response) {
       console.log("COULDN'T DELETE FILE: ", response);
       this.status = response.status + " : " + response.statusText;
+    },
+
+    async getFile() {
+      console.log("localStorage pubkey: ", this.pubKey);
+      //let key = 0 + 3 + this.pubKey;
+      let blake3_hash = this.blake3_hash;
+      // const url = "http://127.0.0.1:7000/retrieve/:" + key; //+
+      const url =
+        "http://127.0.0.1:7000/retrieve/" +
+        0 +
+        3 +
+        this.pubKey +
+        "/" +
+        blake3_hash;
+      // "?pk=" +
+      // key +
+      // "&blake3_hash=" +
+      // blake3_hash;
+      console.log(" >>>>>>>> URL : ", url);
+
+      await fetch(url, {
+        method: "get",
+      })
+        .then((response) => response.body)
+        .then((rb) => {
+          const reader = rb.getReader();
+
+          return new ReadableStream({
+            start(controller) {
+              // The following function handles each data chunk
+              function push() {
+                // "done" is a Boolean and value a "Uint8Array"
+                reader.read().then(({ done, value }) => {
+                  // If there is no more data to read
+                  if (done) {
+                    console.log("done", done);
+                    controller.close();
+                    return;
+                  }
+                  // Get the data and send it to the browser via the controller
+                  controller.enqueue(value);
+                  // Check chunks by logging to the console
+                  console.log("DONE :: ", done);
+                  console.log("VALUE :: ", value);
+                  // this.response = value;
+                  push();
+                });
+              }
+
+              push();
+            },
+          });
+        })
+        .then((stream) =>
+          // Respond with our stream
+          new Response(stream, {
+            headers: { "Content-Type": "text/html" },
+          }).text()
+        )
+        .then((result) => {
+          // Do things with result
+          console.log(" MY STREAM FINAL RESULT:: ", result);
+          this.response = result;
+          this._getFileSuccess(result);
+        })
+        .catch(this._getFileError);
+    },
+
+    _getFileSuccess(result) {
+      this.response = result;
+    },
+
+    _getFileError(response) {
+      console.log("FILE ERROR: ", response);
+      this.status = response.status + " : " + response.statusText;
+      this.response = response.status + " : " + response;
     },
 
     async getFileSlice() {
@@ -398,7 +549,7 @@ button {
     background-color: rgb(128, 128, 128, 0.8);
     margin-left: 10%;
     margin-right: 10%;
-    padding-top: 5%;
+    padding-top: 50px;
     padding-left: 15px;
     padding-right: 15px;
   }
@@ -408,23 +559,40 @@ button {
     flex-direction: row;
     justify-content: space-between;
     margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding-left: 8px;
+    padding-right: 8px;
   }
-  .file-row {
+  .slice-row {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .block-row {
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
     margin-top: 0px;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 0.5em;
     box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
-    padding: 0vmin;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-top: 10px;
   }
+
   #left-group-width {
     width: 60%;
   }
-  #center-group-width {
-    width: 15%;
+  #range-width {
+    width: 75%;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   #right-group-width {
@@ -433,6 +601,21 @@ button {
 
   #full-group-width {
     width: 100%;
+  }
+
+  label {
+    color: rgb(93, 90, 90);
+    opacity: 1;
+    font-weight: 400;
+    font-size: medium;
+    display: block;
+    padding-top: 5px;
+    margin-right: -10px;
+  }
+
+  #pad {
+    padding-left: 5px;
+    padding-right: 5px;
   }
 }
 @media only screen and (min-width: 768px) and (max-width: 1024px) {
@@ -475,8 +658,6 @@ button {
   #full-group-width {
     width: 100%;
   }
-}
-@media only screen and (min-width: 360px) and (max-width: 767px) and (-webkit-device-pixel-ratio: 2) {
   .bg-form {
     display: flex;
     flex-direction: column;
@@ -486,27 +667,50 @@ button {
     background-color: rgb(128, 128, 128, 0.8);
     margin-left: 1%;
     margin-right: 1%;
-    padding-top: 5%;
+    padding-top: 50px;
     padding-left: 15px;
     padding-right: 15px;
   }
+
   .file-row {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .slice-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .block-row {
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
     margin-top: 0px;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 0.5em;
     box-shadow: 0 0 0.25em rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
-    padding: 0vmin;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-top: 10px;
   }
 
   #left-group-width {
     width: 60%;
   }
-  #center-group-width {
-    width: 15%;
+  #range-width {
+    width: 75%;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   #right-group-width {
@@ -516,8 +720,24 @@ button {
   #full-group-width {
     width: 100%;
   }
+
+  label {
+    color: rgb(93, 90, 90);
+    opacity: 1;
+    font-weight: 400;
+    font-size: medium;
+    display: block;
+    padding-top: 5px;
+    margin-right: -10px;
+  }
+
+  #pad {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
 }
-@media only screen and (min-width: 360px) and (max-width: 767px) {
+
+@media only screen and (min-width: 320px) and (max-width: 767px) {
   .bg-form {
     display: flex;
     flex-direction: column;

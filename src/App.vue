@@ -6,7 +6,11 @@
       src="./assets/mini-diamond.png"
     />
     <div>Carbonado</div>
-    <img alt="Diba-Logo" id="img-size" src="./assets/diba-logo.jpg" />
+    <img
+      alt="Diba-Logo"
+      id="diba-logo-size"
+      src="./assets/diba-logo-white.png"
+    />
   </div>
 
   <FileUploader msg="" />
@@ -64,6 +68,12 @@ body {
   width: 50px;
   margin-top: 0px;
   margin-left: 10px;
+}
+
+#diba-logo-size {
+  width: 100px;
+  margin-top: 5px;
+  margin-right: 15px;
 }
 @media only screen and (min-width: 1025px) {
   .diba-header {
