@@ -45,7 +45,7 @@
             type="text"
             class="form-control"
             id="ranges"
-            placeholder="Enter Public Key in Hex Format ( Nostr )"
+            placeholder="0"
             v-model="slice_count"
           />
 
@@ -114,8 +114,8 @@
         <input
           type="text"
           class="form-control"
-          placeholder="Enter Public Key in Hex Format ( Nostr )"
-          v-model="pubKey"
+          placeholder="Get Slice"
+          v-model="blake3_hash"
         />
       </div>
 
@@ -219,6 +219,8 @@ export default {
   data() {
     return {
       id: -1,
+      count: 0,
+      slice_count: 0,
       pubKey: "",
       files: [],
       input: null,
@@ -230,7 +232,6 @@ export default {
       snippet: "File Read Content",
       index_start: 65536,
       range_end: 8192,
-      slice_count: 0,
       blake3_hash: "",
     };
   },
@@ -249,6 +250,7 @@ export default {
 
       const chunkSize = 1000000;
       for (let start = 0; start < file.size; start += chunkSize) {
+        this.slice_count++;
         const url = "http://127.0.0.1:7000/store/" + 0 + 3 + this.pubKey;
         console.log("URL : ", url);
         const chunk = file.slice(start, start + chunkSize);
@@ -334,6 +336,7 @@ export default {
           console.log("GET LAST HASH -> RESULT:: ", result);
           this.linkAddress = result;
           this.blake3_hash = result;
+          //this.pubKey = result;
           //this._getFileSuccess(result);
         });
     },
@@ -379,10 +382,6 @@ export default {
         this.pubKey +
         "/" +
         blake3_hash;
-      // "?pk=" +
-      // key +
-      // "&blake3_hash=" +
-      // blake3_hash;
       console.log(" >>>>>>>> URL : ", url);
 
       await fetch(url, {
@@ -445,35 +444,68 @@ export default {
 
     async getFileSlice() {
       console.log("localStorage pubkey: ", this.pubKey);
+      console.log("lthis.blake3_hash: ", this.blake3_hash);
       let key = 0 + 3 + this.pubKey;
-      let blake3_hash = this.blake3_hash;
-      let index_start = this.index_start;
-      let range_end = this.range_end;
-      //let chain = key + ":3:7";
-      const url =
-        "http://127.0.0.1:7000/slice/" +
-        "?pk=" +
-        key +
-        "&blake3_hash=" +
-        blake3_hash +
-        "&index_start=" +
-        index_start +
-        "&range_end=" +
-        range_end;
+      let blakehash = this.blake3_hash;
+      let group_one = "?pk=" + key + "&black3_hash=" + blakehash;
+      let start = this.index_start;
+      let range = this.range_end;
+      let my_path = group_one + "&index_start=" + start + "&range_end=" + range;
+      const url = "http://127.0.0.1:7000/slice/" + my_path;
+
       console.log(" >>>>>>>> URL : ", url);
 
       await fetch(url, {
         method: "get",
       })
-        .then(this._getFileSliceSuccess)
-        .catch(this._getFileSliceError);
+        .then((response) => response.body)
+        .then((rb) => {
+          const reader = rb.getReader();
+
+          return new ReadableStream({
+            start(controller) {
+              // The following function handles each data chunk
+              function push() {
+                // "done" is a Boolean and value a "Uint8Array"
+                reader.read().then(({ done, value }) => {
+                  // If there is no more data to read
+                  if (done) {
+                    console.log("done", done);
+                    controller.close();
+                    return;
+                  }
+                  // Get the data and send it to the browser via the controller
+                  controller.enqueue(value);
+                  // Check chunks by logging to the console
+                  console.log("SLICE DONE :: ", done);
+                  console.log("SLICE VALUE :: ", value);
+                  // this.response = value;
+                  push();
+                });
+              }
+
+              push();
+            },
+          });
+        })
+        .then((stream) =>
+          // Respond with our stream
+          new Response(stream, {
+            headers: { "Content-Type": "text/html" },
+          }).text()
+        )
+        .then((result) => {
+          // Do things with result
+          console.log(" SLICE STREAM FINAL RESULT:: ", result);
+          this.response = result;
+          this._getFileSuccess(result);
+        })
+        .catch(this._getFileError);
     },
 
-    _getFileSliceSuccess(response) {
-      console.log("FILE SLICE SUCCESS data: ", response);
-      this.linkAddress = response.url;
-      this.status = response.status + " : " + response.statusText;
-      this.response = response;
+    _getFileSliceSuccess(result) {
+      console.log("FILE SLICE SUCCESS result: ", result);
+      this.response = result;
     },
 
     _getFileSliceError(response) {
@@ -537,7 +569,7 @@ button {
 }
 
 #ranges {
-  width: 15%;
+  width: 85%;
 }
 @media only screen and (min-width: 1025px) {
   .bg-form {
